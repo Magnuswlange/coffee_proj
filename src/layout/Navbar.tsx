@@ -31,7 +31,7 @@ export default function Navbar({ logo, links }: Props) {
       className={`fixed inset-x-0 h-20 top-0 py-5 z-100 transition-[background-color,backdrop-filter,box-shadow] duration-200 ease-out ${isScrolled || isOpen ? "glass-strong" : "transparent"}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 1, ease: "easeOut" }}
+      transition={{ duration: 2, ease: "easeOut" }}
     >
       <nav className="container mx-auto px-6 h-full flex items-center justify-between">
         {logo}

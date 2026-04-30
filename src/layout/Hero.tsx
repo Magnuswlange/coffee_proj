@@ -18,11 +18,11 @@ export default function Hero({ imgSrc, id }: Props) {
       <Particles />
       <motion.h1
         className="font-semibold text-6xl text-center text-primary-foreground z-50"
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -80 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
-          duration: 1,
-          ease: "easeInOut",
+          duration: 2,
+          ease: "easeOut",
         }}
       >
         Welcome, <br />
