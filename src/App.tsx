@@ -10,9 +10,10 @@ import OpenRouterAgent from "./components/OpenRouterAgent";
 import { openrouter } from "./agentConfig";
 import Hero from "./layout/Hero";
 import heroImg from "./assets/beans2.jpg";
+import { ntfyUuid } from "./config";
 
 const sendOrder = async (order: Drink) => {
-  const res = await fetch("https://ntfy.sh/REDACTED", {
+  const res = await fetch(`https://ntfy.sh/${ntfyUuid}`, {
     method: "POST",
     headers: {
       "Content-Type": "text/plain",
