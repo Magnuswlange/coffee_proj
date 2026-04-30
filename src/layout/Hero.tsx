@@ -1,6 +1,7 @@
 import Particles from "../components/Particles";
 import Background from "../components/Background";
 import { agentName } from "../agentConfig";
+import { motion } from "motion/react";
 
 type Props = {
   imgSrc: string;
@@ -15,11 +16,19 @@ export default function Hero({ imgSrc, id }: Props) {
     >
       <Background imgSrc={imgSrc} />
       <Particles />
-      <h1 className="font-semibold text-6xl text-center text-primary-foreground z-50">
+      <motion.h1
+        className="font-semibold text-6xl text-center text-primary-foreground z-50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 1,
+          ease: "easeInOut",
+        }}
+      >
         Welcome, <br />
         say hi to <br />
         <span className="text-highlight">{agentName}</span>
-      </h1>
+      </motion.h1>
     </section>
   );
 }
