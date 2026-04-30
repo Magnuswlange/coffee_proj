@@ -1,7 +1,7 @@
 import { Coffee } from "lucide-react";
 import Card from "./components/Card";
 import CardContainer from "./components/CardContainer";
-import Navbar from "./layout/Navbar";
+import Navbar, { type Link } from "./layout/Navbar";
 import Footer from "./layout/Footer";
 import { motion } from "motion/react";
 import type { SocialMedia } from "./layout/Footer";
@@ -59,9 +59,15 @@ const socials: SocialMedia[] = [
   },
 ];
 
+const links: Link[] = [
+  { label: "test", href: "#" },
+  { label: "test", href: "#" },
+  { label: "test", href: "#" },
+];
+
 export default function App() {
   return (
-    <div>
+    <>
       <Navbar
         logo={
           <motion.a href="#hero">
@@ -70,7 +76,7 @@ export default function App() {
             </motion.div>
           </motion.a>
         }
-        links={[]}
+        links={links}
       />
       <main>
         <Hero id="hero" imgSrc={heroImg} />
@@ -106,7 +112,7 @@ export default function App() {
         </motion.div>
       </main>
       <Footer socials={socials} />
-    </div>
+    </>
   );
 }
 
