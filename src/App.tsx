@@ -12,6 +12,7 @@ import Hero from "./layout/Hero";
 import heroImg from "./assets/beans2.jpg";
 import { ntfyUuid } from "./config";
 import Caroussel from "./components/Caroussel";
+import Badge from "./components/Badge";
 
 const sendOrder = async (order: Drink) => {
   const res = await fetch(`https://ntfy.sh/${ntfyUuid}`, {
@@ -70,11 +71,11 @@ export default function App() {
     <>
       <Navbar
         logo={
-          <motion.a href="#hero">
+          <a href="#hero">
             <motion.div whileHover={{ scale: 1.15, opacity: 0.7 }}>
               <Coffee size={24} className="invert" />
             </motion.div>
-          </motion.a>
+          </a>
         }
         links={links}
       />
@@ -82,27 +83,29 @@ export default function App() {
         <Hero id="hero" imgSrc={heroImg} />
 
         {/* Caroussel */}
-        <Caroussel>
+        <Caroussel className="mb-2">
           {coffeeTypes.map((coffee) => (
             <span key={coffee.id}>{coffee.title},</span>
           ))}
         </Caroussel>
 
         {/* Drink cards */}
-        <CardContainer className="pt-24">
+        <CardContainer>
           {coffeeTypes.map((coffee) => (
-            <Card
-              key={coffee.id}
-              title={coffee.title}
-              summary={coffee.desc}
-              onClick={() => sendOrder(coffee)}
-              expandable={true}
-            >
-              <ul className="list-disc list-inside">
-                <li>{coffee.isHot ? "Hot" : "Iced"}</li>
-                <li>{coffee.volumeMl}mL</li>
-              </ul>
-            </Card>
+            <div key={coffee.id} className="relative w-full">
+              {coffee.popular && <Badge>Popular</Badge>}
+              <Card
+                title={coffee.title}
+                summary={coffee.desc}
+                onClick={() => sendOrder(coffee)}
+                expandable={true}
+              >
+                <ul className="list-disc list-inside">
+                  <li>{coffee.isHot ? "Hot" : "Iced"}</li>
+                  <li>{coffee.volumeMl}mL</li>
+                </ul>
+              </Card>
+            </div>
           ))}
         </CardContainer>
 
