@@ -38,6 +38,12 @@ export default function OpenRouterAgent({ openRouter }: Props) {
         placeholder="idk what i want, recommend me a coffee with oat milk..."
         className="w-full mx-auto h-25 min-h-20 max-h-50 bg-primary squircle px-4 py-2 mb-6"
         onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleQuery();
+          }
+        }}
       />
       <Button onClick={handleQuery} disabled={loading} className="w-full mb-4">
         {loading ? "Thinking..." : "Send"}

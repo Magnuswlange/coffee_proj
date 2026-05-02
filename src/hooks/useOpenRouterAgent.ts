@@ -24,7 +24,7 @@ export function useOpenRouterAgent({ openRouter }: Props) {
 
   const handleQuery = async () => {
     const newQuery = query.trim();
-    if (!newQuery) return;
+    if (!newQuery || loading) return;
 
     setQuery("");
     setLoading(true);
