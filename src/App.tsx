@@ -74,7 +74,7 @@ export default function App() {
         </CardContainer>
 
         {/* LLM bot: coffee recommendations */}
-        <OpenRouterAgent openRouter={openrouter} />
+        <OpenRouterAgent className="w-full" openRouter={openrouter} />
       </main>
 
       <Footer socials={socials} />

@@ -31,11 +31,20 @@
     border-radius: 1.5rem;
   }
 
+  .squircle-tl {
+    border-radius: 1.5rem 0 0 0;
+  }
+
   /* for supported browsers, use squircle corner shape */
   @supports (corner-shape: squircle) {
     .squircle {
       border-radius: 3rem; /* rounded-3xl is 1.5rem for corner-type: round. advised to double this for squircle. */
       corner-shape: squircle;
+    }
+
+    .squircle-tl {
+      border-radius: 3rem 0 0 0; /* rounded-3xl is 1.5rem for corner-type: round. advised to double this for squircle. */
+      corner-shape: squircle square square square;
     }
   }
 

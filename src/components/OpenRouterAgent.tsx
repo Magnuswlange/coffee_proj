@@ -63,7 +63,7 @@ export default function OpenRouterAgent({ openRouter, className }: Props) {
 
   return (
     <motion.div
-      className={`fixed bottom-0 right-0 z-100 text-secondary-foreground bg-secondary flex flex-col rounded-tl-3xl items-center p-4 overflow-hidden ${className ?? ""}`}
+      className={`fixed bottom-0 right-0 z-100 text-secondary-foreground bg-secondary flex flex-col squircle-tl items-center p-4 overflow-hidden ${className ?? ""}`}
       whileHover={{
         scale: 1.05,
         backgroundColor: "var(--color-secondary)",
