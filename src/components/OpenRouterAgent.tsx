@@ -6,7 +6,8 @@ import { useOpenRouterAgent } from "../hooks/useOpenRouterAgent";
 import { agentName } from "../ai/agentModels";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import useAutoScroll from "../hooks/useAutoScroll";
 
 const parentVariant2: Variants = {
   hidden: {
@@ -56,14 +57,30 @@ type Props = {
   className?: string;
 };
 
-export default function OpenRouterAgent({ openRouter, className }: Props) {
+export default function OpenRouterAgent({ openRouter, className = "" }: Props) {
   const [isExpanded, setisExpanded] = useState<boolean>(false);
-  const { query, setQuery, response, loading, error, handleQuery } =
+  const { query, setQuery, loading, error, handleQuery, history } =
     useOpenRouterAgent({ openRouter });
+
+  const visibleMessages = history.filter((msg) => {
+    const role = msg.role;
+    const message = typeof msg.content === "string" ? msg.content.trim() : "";
+    const shouldBeDisplayed = role === "user" || role === "assistant";
+    const isToolCallMessage =
+      role === "assistant" &&
+      Array.isArray(msg.toolCalls) &&
+      msg.toolCalls.length > 0 &&
+      !message;
+
+    return shouldBeDisplayed && message && !isToolCallMessage;
+  });
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  useAutoScroll(scrollRef, visibleMessages.length);
 
   return (
     <motion.div
-      className={`fixed bottom-0 right-0 z-100 text-secondary-foreground bg-secondary flex flex-col squircle-tl items-center p-4 overflow-hidden ${className ?? ""}`}
+      className={`fixed bottom-0 right-0 z-100 text-secondary-foreground bg-secondary flex flex-col squircle-tl items-center p-4 overflow-hidden ${className}`}
       whileHover={{
         scale: 1.05,
         backgroundColor: "var(--color-secondary)",
@@ -78,8 +95,8 @@ export default function OpenRouterAgent({ openRouter, className }: Props) {
         transition: { duration: 0.2, ease: "easeOut" },
         y: 0,
         opacity: 1,
-        width: isExpanded ? 400 : 100,
-        height: isExpanded ? 350 : 60,
+        width: isExpanded ? 450 : 100,
+        height: isExpanded ? 650 : 60,
       }}
       exit={{ y: 20, opacity: 0 }}
     >
@@ -108,12 +125,61 @@ export default function OpenRouterAgent({ openRouter, className }: Props) {
             transition={{ duration: 0.2, ease: "easeOut" }}
             style={{ overflow: "hidden" }}
           >
+            <motion.div
+              variants={childVariant2}
+              className="w-full text-wrap h-100 bg-primary squircle px-4 py-2 overflow-y-auto mb-4"
+            >
+              {visibleMessages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`mb-3 flex ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                      msg.role === "user"
+                        ? "bg-blue-500 text-white text-right"
+                        : "bg-white/10 text-left"
+                    }`}
+                  >
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({ children }) => (
+                          <p className="mb-3 last:mb-0">{children}</p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="mb-3 list-disc space-y-1 pl-5">
+                            {children}
+                          </ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="mb-3 list-decimal space-y-1 pl-5">
+                            {children}
+                          </ol>
+                        ),
+                        li: ({ children }) => <li>{children}</li>,
+                        strong: ({ children }) => (
+                          <strong className="font-semibold">{children}</strong>
+                        ),
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                    <div ref={scrollRef} />
+                  </div>
+                </div>
+              ))}
+              {error && <p className="text-500-red">{error}</p>}
+            </motion.div>
+
             <motion.textarea
               variants={childVariant2}
               style={{ resize: "none" }}
               value={query}
               placeholder="idk what i want, recommend me a coffee with oat milk..."
-              className="w-full mx-auto h-50 bg-primary squircle px-4 py-2 mb-4"
+              className="w-full mx-auto h-20 bg-primary squircle px-4 py-2"
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -122,6 +188,7 @@ export default function OpenRouterAgent({ openRouter, className }: Props) {
                 }
               }}
             />
+
             <motion.div variants={childVariant2} className="w-full">
               <Button
                 onClick={handleQuery}
@@ -131,32 +198,6 @@ export default function OpenRouterAgent({ openRouter, className }: Props) {
                 {loading ? "Thinking..." : "Send"}
               </Button>
             </motion.div>
-
-            <motion.div variants={childVariant2} className="w-full text-wrap">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: ({ children }) => <p className="mb-3">{children}</p>,
-                  ul: ({ children }) => (
-                    <ul className="mb-3 list-disc space-y-1 pl-5">
-                      {children}
-                    </ul>
-                  ),
-                  ol: ({ children }) => (
-                    <ol className="mb-3 list-decimal space-y-1 pl-5">
-                      {children}
-                    </ol>
-                  ),
-                  li: ({ children }) => <li>{children}</li>,
-                  strong: ({ children }) => (
-                    <strong className="font-semibold">{children}</strong>
-                  ),
-                }}
-              >
-                {response}
-              </ReactMarkdown>
-            </motion.div>
-            {error && <p className="text-500-red">{error}</p>}
           </motion.div>
         )}
       </AnimatePresence>
