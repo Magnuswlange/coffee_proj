@@ -26,17 +26,18 @@ export function useOpenRouterAgent({ openRouter }: Props) {
     const newQuery = query.trim();
     if (!newQuery || loading) return;
 
-    setQuery("");
-    setLoading(true);
-    setResponse("");
-    setError("");
-
     const userMessage: ChatMessages = {
       role: "user",
       content: newQuery,
     };
 
     const messages: ChatMessages[] = [...history, userMessage];
+
+    setQuery("");
+    setLoading(true);
+    setResponse("");
+    setError("");
+    setHistory(messages); // instantly set new message so UI is responsive
 
     try {
       const firstResponse = await openRouter.chat.send({
@@ -89,14 +90,14 @@ export function useOpenRouterAgent({ openRouter }: Props) {
       setResponse(finalResponse);
 
       if (finalMessage) {
-        setHistory([
-          ...messages,
+        setHistory((prev) => [
+          ...prev,
           assistantMessage,
           ...toolMessages,
           finalMessage,
         ]);
       } else {
-        setHistory([...messages, assistantMessage, ...toolMessages]);
+        setHistory((prev) => [...prev, assistantMessage, ...toolMessages]);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -105,5 +106,5 @@ export function useOpenRouterAgent({ openRouter }: Props) {
     }
   };
 
-  return { query, setQuery, response, loading, error, handleQuery };
+  return { query, setQuery, response, loading, error, handleQuery, history };
 }
