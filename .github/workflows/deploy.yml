@@ -22,7 +22,7 @@ jobs:
       - run: npm run build
 
       - name: Get SSH pass and set perms
-        uses: appleboy/scp-action@0.1.7
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -32,7 +32,7 @@ jobs:
           target: "~/node-app"
         
       - name: Deploy using SCP
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
