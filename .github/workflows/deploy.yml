@@ -28,7 +28,9 @@ jobs:
       - name: Copy build files (/dist) to nginx ws host
         # use rsync to delete old files first. also copies just changes, so deployment is faster compared to using scp.
         run: |
-          rsync -av --delete -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+         rsync -rltv --delete \
+            --no-owner --no-group --no-perms \
+            -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
             ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/srv/docker/nginx_ws_proj/
 
       - name: Restart Docker container on nginx ws host
