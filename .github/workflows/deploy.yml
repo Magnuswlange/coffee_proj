@@ -31,11 +31,11 @@ jobs:
          rsync -rltv --delete \
             --no-owner --no-group --no-perms \
             -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
-            ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/srv/docker/nginx_ws_proj/
+            ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/srv/docker/coffee_app/
 
       - name: Restart Docker container on nginx ws host
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          cd ~/docker_compose/nginx_ws_proj/
+          cd ~/docker_compose/coffee_app/
           docker compose up -d
           "
