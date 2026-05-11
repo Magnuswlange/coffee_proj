@@ -1,6 +1,6 @@
 import { OpenRouter } from "@openrouter/sdk";
 import { Bot } from "lucide-react";
-import { AnimatePresence, motion, type Variants } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import Button from "./Button";
 import { useOpenRouterAgent } from "../hooks/useOpenRouterAgent";
 import { agentName } from "../ai/agentModels";
@@ -9,56 +9,13 @@ import remarkGfm from "remark-gfm";
 import { useRef, useState } from "react";
 import useAutoScroll from "../hooks/useAutoScroll";
 
-const parentVariant2: Variants = {
-  hidden: {
-    opacity: 0,
-    transition: {
-      when: "afterChildren",
-      type: "tween",
-      ease: "easeOut",
-      duration: 0.2,
-      staggerDirection: -1,
-      staggerChildren: 0, // after removing children delay
-      delayChildren: 0.1, // per child delay
-    },
-  },
-  visible: {
-    opacity: 1,
-    transition: {
-      when: "beforeChildren",
-      type: "tween",
-      ease: "easeOut",
-      duration: 0.2,
-      staggerChildren: 0.1, // per child delay
-      delayChildren: 0, // delay before children
-    },
-  },
-};
-
-const childVariant2: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 40,
-    transition: { type: "tween", ease: "easeOut", duration: 0.2 },
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "tween",
-      ease: "easeOut",
-      duration: 0.2,
-    },
-  },
-};
-
 type Props = {
   openRouter: OpenRouter;
   className?: string;
 };
 
 export default function OpenRouterAgent({ openRouter, className = "" }: Props) {
-  const [isExpanded, setisExpanded] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const { query, setQuery, loading, error, handleQuery, history } =
     useOpenRouterAgent({ openRouter });
 
@@ -80,86 +37,87 @@ export default function OpenRouterAgent({ openRouter, className = "" }: Props) {
 
   return (
     <motion.div
-      className={`fixed bottom-0 right-0 z-100 text-secondary-foreground bg-secondary flex flex-col squircle-tl items-center p-4 overflow-hidden ${className}`}
-      whileHover={{
-        scale: 1.05,
-        backgroundColor: "var(--color-secondary)",
-        color: "var(--color-secondary-foreground)",
-      }}
-      whileTap={{ scale: 0.95 }}
-      initial={{
-        y: 20,
-        opacity: 0,
-      }}
-      animate={{
-        transition: { duration: 0.2, ease: "easeOut" },
-        y: 0,
-        opacity: 1,
-        width: isExpanded ? 450 : 100,
-        height: isExpanded ? 650 : 60,
-      }}
-      exit={{ y: 20, opacity: 0 }}
+      className={`fixed bottom-0 right-0 z-100 text-secondary-foreground bg-secondary squircle-tl px-6 py-4 ${className}`}
+      animate={{ width: isOpen ? "min(100vw, 800px)" : 120 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      whileHover={!isOpen ? { scale: 1.05 } : undefined}
     >
       <motion.h2
-        className="flex items-center justify-center gap-2 mb-2 min-h-5"
-        onClick={() => setisExpanded((prev) => !prev)}
+        className="flex items-center justify-center gap-2 mb-4"
+        onClick={() => setIsOpen((prev) => !prev)}
         whileHover={{
           cursor: "pointer",
         }}
       >
-        {isExpanded && (
-          <span className="font-semibold text-3xl">Ask {agentName}</span>
+        {isOpen && (
+          <span className="font-semibold text-3xl">
+            {agentName} Knows-It-All AI &trade;
+          </span>
         )}
         <Bot size={24} />
       </motion.h2>
 
-      <AnimatePresence initial={true} mode="wait">
-        {isExpanded && (
+      <AnimatePresence initial={false}>
+        {isOpen && (
           <motion.div
-            className="w-full"
-            variants={parentVariant2}
-            key="key"
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
+            key="chat-body"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            style={{ overflow: "hidden" }}
+            className="w-full overflow-hidden flex flex-col gap-6 bg-primary max-h-[50vh] squircle"
           >
-            <motion.div
-              variants={childVariant2}
-              className="w-full text-wrap h-100 bg-primary squircle px-4 py-2 overflow-y-auto mb-4"
-            >
-              {visibleMessages.map((msg, i) => (
+            <div className="min-h-[25vh] overflow-y-auto overscroll-contain px-4">
+              {visibleMessages.map((msg, idx) => (
                 <div
-                  key={i}
-                  className={`mb-3 flex ${
+                  key={idx}
+                  className={`mt-3 flex ${
                     msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   <div
                     className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                       msg.role === "user"
-                        ? "bg-blue-500 text-white text-right"
+                        ? "bg-blue-500 text-right"
                         : "bg-white/10 text-left"
                     }`}
                   >
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
+                        h1: ({ children }) => (
+                          <h1 className="text-xl font-semibold mt-4 mb-2 first:mt-0">
+                            {children}
+                          </h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="text-lg font-semibold mt-4 mb-2 first:mt-0">
+                            {children}
+                          </h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="text-base font-semibold mt-3 mb-1 first:mt-0">
+                            {children}
+                          </h3>
+                        ),
                         p: ({ children }) => (
-                          <p className="mb-3 last:mb-0">{children}</p>
+                          <p className="leading-relaxed mt-3 first:mt-0">
+                            {children}
+                          </p>
                         ),
                         ul: ({ children }) => (
-                          <ul className="mb-3 list-disc space-y-1 pl-5">
+                          <ul className="list-disc space-y-1 list-inside ml-2">
                             {children}
                           </ul>
                         ),
                         ol: ({ children }) => (
-                          <ol className="mb-3 list-decimal space-y-1 pl-5">
+                          <ol className="list-decimal space-y-1 list-inside ml-2">
                             {children}
                           </ol>
                         ),
-                        li: ({ children }) => <li>{children}</li>,
+                        li: ({ children }) => (
+                          <li className="leading-relaxed">{children}</li>
+                        ),
                         strong: ({ children }) => (
                           <strong className="font-semibold">{children}</strong>
                         ),
@@ -167,19 +125,18 @@ export default function OpenRouterAgent({ openRouter, className = "" }: Props) {
                     >
                       {msg.content}
                     </ReactMarkdown>
-                    <div ref={scrollRef} />
                   </div>
+                  <div ref={scrollRef} />
                 </div>
               ))}
-              {error && <p className="text-500-red">{error}</p>}
-            </motion.div>
+              {error && <p className="text-red-500">{error}</p>}
+            </div>
 
-            <motion.textarea
-              variants={childVariant2}
+            <textarea
               style={{ resize: "none" }}
               value={query}
-              placeholder="idk what i want, recommend me a coffee with oat milk..."
-              className="w-full mx-auto h-20 bg-primary squircle px-4 py-2"
+              placeholder="Type your question here"
+              className="h-20 shrink-0 bg-white/10 squircle px-4 py-2 mx-4"
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -189,7 +146,7 @@ export default function OpenRouterAgent({ openRouter, className = "" }: Props) {
               }}
             />
 
-            <motion.div variants={childVariant2} className="w-full">
+            <div className="w-full px-4 pb-6">
               <Button
                 onClick={handleQuery}
                 disabled={loading}
@@ -197,7 +154,7 @@ export default function OpenRouterAgent({ openRouter, className = "" }: Props) {
               >
                 {loading ? "Thinking..." : "Send"}
               </Button>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
