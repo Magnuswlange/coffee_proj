@@ -27,12 +27,12 @@ jobs:
 
       - name: Copy build files (/dist) to nginx ws host
         run: |
-          scp -i ~/.ssh/id_rsa -r ./dist/* \
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r ./dist/* \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/node-app/
 
       - name: Restart Docker container on nginx ws host
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
           cd ~/docker_compose/nginx_ws
           docker compose down
           docker compose up -d
