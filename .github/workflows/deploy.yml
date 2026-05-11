@@ -21,25 +21,19 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Get SSH pass and set perms
-        uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASS }}
-          port: 22
-          source: "dist/*"
-          target: "~/node-app"
-        
+      - name: Get SSH key and set perms
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+          
       - name: Deploy using SCP
-        uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASS }}
-          port: 22
-          script: |
-            cd ~/docker_compose/nginx_ws
-            docker compose down
-            docker compose up -d 
+        run: scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r ./dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/node-app
+
+      - name: Restart server
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          cd ~/docker_compose/nginx_ws
+          docker compose down
+          docker compose up -d
+          "
        
