@@ -11,13 +11,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
 
-      - run: npm ci
-      - run: npm run build
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: ./frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./frontend
 
       - name: Setup SSH key
         run: |
@@ -25,17 +32,27 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Copy build files (/dist) to nginx ws host
-        # use rsync to delete old files first. also copies just changes, so deployment is faster compared to using scp.
-        run: |
-         rsync -rltv --delete \
-            --no-owner --no-group --no-perms \
-            -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
-            ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/srv/docker/coffee_app/
-
-      - name: Restart Docker container on nginx ws host
+      - name: Create /backend/.env on server
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          cd ~/docker_compose/coffee_app/
-          docker compose up -d
+          mkdir -p /srv/docker/coffee_app/backend
+            echo 'OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}' > /srv/docker/coffee_app/backend/.env
+          "
+
+      - name: Sync project files to server
+        run: |
+          rsync -rltv --delete \
+            --no-owner --no-group --no-perms \
+            --exclude "node_modules" \
+            --exclude ".git" \
+            --exclude ".env" \
+            -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+            ./ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/srv/docker/coffee_app/
+
+      - name: Rebuild and restart containers (stack)
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          cd /srv/docker/coffee_app/
+          docker compose up -d --build
           "
