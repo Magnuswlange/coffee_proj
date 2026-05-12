@@ -35,10 +35,10 @@ jobs:
       - name: Create /backend/.env on server
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          mkdir -p /srv/docker/coffee_app/backend
+          mkdir -p /srv/docker/coffee_app/backend/
           {
             echo 'OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}' > /srv/docker/coffee_app/backend/.env
-            echo 'NTFY_TOPIC=${{ secrets.NTFY_TOPIC }} ` >> /srv/docker/coffee_app/backend/.env
+            echo 'NTFY_TOPIC=${{ secrets.NTFY_TOPIC }} ' >> /srv/docker/coffee_app/backend/.env
           }
           "
 
