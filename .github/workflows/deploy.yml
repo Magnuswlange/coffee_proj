@@ -37,7 +37,8 @@ jobs:
          rsync -rltv --delete \
             --no-owner --no-group --no-perms \
             -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
-            ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/srv/docker/coffee_app/
+            ./ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/srv/docker/coffee_app/
 
       - name: Restart Docker container on nginx ws host
         run: |
