@@ -1,23 +1,22 @@
-import { OpenRouter } from "@openrouter/sdk";
 import { Bot } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Button from "./Button";
 import { useOpenRouterAgent } from "../hooks/useOpenRouterAgent";
-import { agentName } from "../ai/agentModels";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useRef, useState } from "react";
 import useAutoScroll from "../hooks/useAutoScroll";
 
+const agentName: string = "Frank";
+
 type Props = {
-  openRouter: OpenRouter;
   className?: string;
 };
 
-export default function OpenRouterAgent({ openRouter, className = "" }: Props) {
+export default function OpenRouterAgent({ className = "" }: Props) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { query, setQuery, loading, error, handleQuery, history } =
-    useOpenRouterAgent({ openRouter });
+    useOpenRouterAgent();
 
   const visibleMessages = history.filter((msg) => {
     const role = msg.role;

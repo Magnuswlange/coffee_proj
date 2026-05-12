@@ -1,26 +1,16 @@
 import { useState } from "react";
-import type { OpenRouter } from "@openrouter/sdk";
 import type { ChatMessages } from "@openrouter/sdk/models";
-import { systemPrompt } from "../ai/agentPrompt";
-import { model } from "../ai/agentModels";
-import { tools } from "../ai/agentTools";
-import { runTool } from "../ai/toolHandlers";
 
-type Props = {
-  openRouter: OpenRouter;
-};
+const BASE_URL = import.meta.env.DEV
+  ? "http://localhost:3000/api/agent"
+  : "/api/agent";
 
-export function useOpenRouterAgent({ openRouter }: Props) {
+export function useOpenRouterAgent() {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [history, setHistory] = useState<ChatMessages[]>([
-    {
-      role: "system",
-      content: systemPrompt,
-    },
-  ]);
+  const [history, setHistory] = useState<ChatMessages[]>([]);
 
   const handleQuery = async () => {
     const newQuery = query.trim();
@@ -32,6 +22,7 @@ export function useOpenRouterAgent({ openRouter }: Props) {
     };
 
     const messages: ChatMessages[] = [...history, userMessage];
+    console.log("sending messages: ", messages);
 
     setQuery("");
     setLoading(true);
@@ -40,65 +31,24 @@ export function useOpenRouterAgent({ openRouter }: Props) {
     setHistory(messages); // instantly set new message so UI is responsive
 
     try {
-      const firstResponse = await openRouter.chat.send({
-        chatRequest: {
-          model: model,
-          messages: messages,
-          tools: tools,
-          toolChoice: "auto",
+      const res = await fetch(BASE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ messages }),
       });
 
-      const assistantMessage = firstResponse.choices?.[0]?.message;
-      if (!assistantMessage) throw new Error("No assistant response received");
-
-      const toolCalls = assistantMessage.toolCalls ?? [];
-
-      if (toolCalls.length === 0) {
-        const finalResponse = assistantMessage.content ?? "";
-        setResponse(finalResponse);
-        setHistory([
-          ...messages,
-          { role: "assistant", content: finalResponse },
-        ]);
-        return;
+      if (!res.ok) {
+        throw new Error(`Request failed: ${res.status}`);
       }
 
-      const toolMessages: ChatMessages[] = [];
-
-      for (const toolCall of toolCalls) {
-        const res = await runTool(toolCall.function.name);
-        toolMessages.push({
-          role: "tool",
-          toolCallId: toolCall.id,
-          content: JSON.stringify(res),
-        });
-      }
-
-      const secondResponse = await openRouter.chat.send({
-        chatRequest: {
-          model: model,
-          messages: [...messages, assistantMessage, ...toolMessages],
-          tools: tools,
-          toolChoice: "auto",
-        },
-      });
-
-      const finalMessage = secondResponse.choices?.[0]?.message;
-      const finalResponse = finalMessage?.content ?? "";
-
-      setResponse(finalResponse);
-
-      if (finalMessage) {
-        setHistory((prev) => [
-          ...prev,
-          assistantMessage,
-          ...toolMessages,
-          finalMessage,
-        ]);
-      } else {
-        setHistory((prev) => [...prev, assistantMessage, ...toolMessages]);
-      }
+      const data = await res.json();
+      setResponse(data.response ?? "");
+      setHistory([
+        ...messages,
+        { role: "assistant", content: data.response ?? "" },
+      ]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {

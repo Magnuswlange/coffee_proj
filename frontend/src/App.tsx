@@ -9,12 +9,12 @@ import Hero from "./layout/Hero";
 import heroImg from "./assets/beans.jpg";
 import Caroussel from "./components/Caroussel";
 import Badge from "./components/Badge";
-import { drinkTypes } from "./data/drinkTypes";
 import { links } from "./data/navLinks";
 import { socials } from "./data/socials";
 import { sendOrder } from "./services/orders";
-import { openrouter } from "./ai/openrouterClient";
-import { agentName } from "./ai/agentModels";
+import { drinkTypes } from "./data/drinkTypes";
+
+const agentName: string = "Frank";
 
 export default function App() {
   return (
@@ -74,7 +74,7 @@ export default function App() {
         </CardContainer>
 
         {/* LLM bot: coffee recommendations */}
-        <OpenRouterAgent className="" openRouter={openrouter} />
+        <OpenRouterAgent />
       </main>
 
       <Footer socials={socials} />

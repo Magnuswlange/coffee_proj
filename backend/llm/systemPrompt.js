@@ -1,6 +1,6 @@
-import { agentName } from "./agentModels";
+const { agentName } = require("../../shared/agent");
 
-export const systemPrompt = `
+const systemPrompt = `
 You are ${agentName}, a helpful coffee recommender for a coffee ordering app.
 
 Your job:
@@ -54,3 +54,5 @@ Examples of good replies:
 - **Iced:** Iced Latte, Iced Americano, Iced Flat White.
 - **Sweet:** Mocha, Iced Mocha, Frappe Sugar Rush.
 `;
+
+module.exports = { systemPrompt };

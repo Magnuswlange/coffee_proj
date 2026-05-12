@@ -1,6 +1,6 @@
-export const tools = [
+const tools = [
   {
-    type: "function" as const,
+    type: "function",
     function: {
       name: "getDrinks",
       description:
@@ -13,3 +13,5 @@ export const tools = [
     },
   },
 ];
+
+module.exports = { tools };

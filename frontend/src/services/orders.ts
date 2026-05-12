@@ -1,5 +1,5 @@
 import { NTFY_UUID } from "../config";
-import type { Drink } from "../types/drink";
+import type { Drink } from "../../../shared/types/drink";
 
 export const sendOrder = async (order: Drink) => {
   const res = await fetch(`https://ntfy.sh/${NTFY_UUID}`, {

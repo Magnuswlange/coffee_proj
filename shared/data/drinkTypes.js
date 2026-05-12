@@ -1,6 +1,4 @@
-import type { Drink } from "../../../shared/types/drink";
-
-export const drinkTypes: Drink[] = [
+const drinkTypes = [
   {
     id: 3,
     title: "Flat White",
@@ -156,3 +154,5 @@ export const drinkTypes: Drink[] = [
     popular: false,
   },
 ];
+
+module.exports = { drinkTypes };
